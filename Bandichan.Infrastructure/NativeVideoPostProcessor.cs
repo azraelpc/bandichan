@@ -12,6 +12,9 @@ namespace Bandichan.Infrastructure;
 
 public sealed class NativeVideoPostProcessor : IVideoPostProcessor
 {
+    private const double EightMbPresetHardLimitMb = 10.0;
+    private const double EightMbPresetCorrectionTargetMb = 9.6;
+
     public async Task<ExportResult> ExportAsync(
         ExportOptions options,
         IProgress<ExportProgress>? progress = null,
@@ -63,6 +66,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         var effectiveDuration = TimeSpan.FromTicks(ranges.Sum(r => (r.End - r.Start).Ticks));
         var (videoBitrateKbps, audioBitrateKbps, targetMb) = CalculateEncodingTargets(options, effectiveDuration);
         var requiresExactEdits = options.EnableCrop || options.EnableResize || options.DeletedSegments.Count > 0;
+        var selectedCodec = options.TargetCodec;
 
         progress?.Report(new ExportProgress(0, "Preparing export...", targetMb));
 
@@ -79,11 +83,10 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         {
             progress?.Report(new ExportProgress(0, "Debug path: direct transcode (no edits workflow)...", targetMb));
             outputFile = await CreateOutputFileAsync(options.OutputPath, cancellationToken);
-            if (await TryDirectTranscodeAsync(sourceFile, outputFile, options.KeepAudio, videoBitrateKbps, audioBitrateKbps, targetMb, progress, cancellationToken))
+            if (await TryDirectTranscodeAsync(sourceFile, outputFile, options.KeepAudio, videoBitrateKbps, audioBitrateKbps, targetMb, selectedCodec, progress, cancellationToken))
             {
                 progress?.Report(new ExportProgress(100, "Completed (direct transcode)", targetMb));
-                var directMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
-                return new ExportResult(options.OutputPath, targetMb, directMb, videoBitrateKbps, audioBitrateKbps);
+                return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, audioBitrateKbps, progress, cancellationToken);
             }
 
             // If direct path fails, continue with composition fallback chain below.
@@ -92,7 +95,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
 
         try
         {
-            var tunedProfile = BuildTunedProfile(options, plan, videoBitrateKbps, audioBitrateKbps);
+            var tunedProfile = BuildTunedProfile(options, plan, videoBitrateKbps, audioBitrateKbps, selectedCodec);
             var tunedComposition = await BuildCompositionAsync(sourceFile, sourceDuration, ranges, options.KeepAudio, plan, applyTransforms: true, cancellationToken);
             await RenderCompositionAsync(tunedComposition, outputFile, tunedProfile, MediaTrimmingPreference.Precise, targetMb, progress, cancellationToken);
         }
@@ -103,6 +106,12 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                 throw;
             }
 
+            if (selectedCodec == ExportVideoCodec.Hevc)
+            {
+                selectedCodec = ExportVideoCodec.H264;
+                progress?.Report(new ExportProgress(0, "HEVC unavailable on this system. Falling back to H.264...", targetMb));
+            }
+
             // Some systems/codecs reject advanced profile attributes with MF_E_ATTRIBUTENOTFOUND.
             // Retry with conservative settings and finally disable transforms if needed.
             progress?.Report(new ExportProgress(0, "Retrying export with compatibility profile...", targetMb));
@@ -110,7 +119,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
 
             try
             {
-                var fallbackProfile = BuildCompatibilityProfile(options, plan);
+                var fallbackProfile = BuildCompatibilityProfile(options, plan, videoBitrateKbps, audioBitrateKbps, selectedCodec);
                 var fallbackComposition = await BuildCompositionAsync(sourceFile, sourceDuration, ranges, options.KeepAudio, plan, applyTransforms: true, cancellationToken);
                 await RenderCompositionAsync(fallbackComposition, outputFile, fallbackProfile, MediaTrimmingPreference.Precise, targetMb, progress, cancellationToken);
             }
@@ -129,8 +138,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                     var keepEditsComposition = await BuildCompositionAsync(sourceFile, sourceDuration, ranges, options.KeepAudio, plan, applyTransforms: true, cancellationToken);
                     await RenderCompositionAsync(keepEditsComposition, outputFile, profile: null, MediaTrimmingPreference.Fast, targetMb, progress, cancellationToken);
                     progress?.Report(new ExportProgress(100, "Completed", targetMb));
-                    var keepEditsMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
-                    return new ExportResult(options.OutputPath, targetMb, keepEditsMb, videoBitrateKbps, audioBitrateKbps);
+                    return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, audioBitrateKbps, progress, cancellationToken);
                 }
                 catch (Exception exKeepEdits)
                 {
@@ -150,11 +158,10 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                         try
                         {
                             var cropOnlyComposition = await BuildCompositionAsync(sourceFile, sourceDuration, ranges, options.KeepAudio, planNoResize, applyTransforms: true, cancellationToken);
-                            var cropOnlyProfile = BuildCompatibilityProfile(options, planNoResize);
+                            var cropOnlyProfile = BuildCompatibilityProfile(options, planNoResize, videoBitrateKbps, audioBitrateKbps, selectedCodec);
                             await RenderCompositionAsync(cropOnlyComposition, outputFile, cropOnlyProfile, MediaTrimmingPreference.Fast, targetMb, progress, cancellationToken);
                             progress?.Report(new ExportProgress(100, "Completed", targetMb));
-                            var cropOnlyMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
-                            return new ExportResult(options.OutputPath, targetMb, cropOnlyMb, videoBitrateKbps, audioBitrateKbps);
+                            return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, audioBitrateKbps, progress, cancellationToken);
                         }
                         catch (Exception exCropOnly)
                         {
@@ -172,8 +179,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                             var cropDefaultComposition = await BuildCompositionAsync(sourceFile, sourceDuration, ranges, options.KeepAudio, planNoResize, applyTransforms: true, cancellationToken);
                             await RenderCompositionAsync(cropDefaultComposition, outputFile, profile: null, MediaTrimmingPreference.Fast, targetMb, progress, cancellationToken);
                             progress?.Report(new ExportProgress(100, "Completed", targetMb));
-                            var cropDefaultMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
-                            return new ExportResult(options.OutputPath, targetMb, cropDefaultMb, videoBitrateKbps, audioBitrateKbps);
+                            return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, audioBitrateKbps, progress, cancellationToken);
                         }
                         catch (Exception exCropDefault)
                         {
@@ -193,8 +199,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                                 var cropAudioDefaultComposition = await BuildCompositionAsync(sourceFile, sourceDuration, ranges, keepAudio: true, planNoResize, applyTransforms: true, cancellationToken);
                                 await RenderCompositionDefaultAsync(cropAudioDefaultComposition, outputFile, targetMb, progress, cancellationToken);
                                 progress?.Report(new ExportProgress(100, "Completed", targetMb));
-                                var cropAudioDefaultMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
-                                return new ExportResult(options.OutputPath, targetMb, cropAudioDefaultMb, videoBitrateKbps, audioBitrateKbps);
+                                return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, audioBitrateKbps, progress, cancellationToken);
                             }
                             catch (Exception exCropAudioDefault)
                             {
@@ -210,7 +215,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                             try
                             {
                                 var cropNoAudioComposition = await BuildCompositionAsync(sourceFile, sourceDuration, ranges, keepAudio: false, planNoResize, applyTransforms: true, cancellationToken);
-                                var cropNoAudioProfile = BuildCompatibilityProfile(options with { KeepAudio = false }, planNoResize);
+                                var cropNoAudioProfile = BuildCompatibilityProfile(options with { KeepAudio = false }, planNoResize, videoBitrateKbps, audioBitrateKbps: 0, selectedCodec);
                                 await RenderCompositionAsync(cropNoAudioComposition, outputFile, cropNoAudioProfile, MediaTrimmingPreference.Fast, targetMb, progress, cancellationToken);
 
                                 var outputAudioKbps = 0;
@@ -226,8 +231,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                                 }
 
                                 progress?.Report(new ExportProgress(100, "Completed", targetMb));
-                                var cropNoAudioMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
-                                return new ExportResult(options.OutputPath, targetMb, cropNoAudioMb, videoBitrateKbps, outputAudioKbps);
+                                return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, outputAudioKbps, progress, cancellationToken);
                             }
                             catch (Exception exCropNoAudio)
                             {
@@ -248,7 +252,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                 outputFile = await CreateOutputFileAsync(options.OutputPath, cancellationToken);
                 try
                 {
-                    var safeProfile = BuildCompatibilityProfile(options, plan with { EnableCrop = false, EnableResize = false });
+                    var safeProfile = BuildCompatibilityProfile(options, plan with { EnableCrop = false, EnableResize = false }, videoBitrateKbps, audioBitrateKbps, selectedCodec);
                     var safeComposition = await BuildCompositionAsync(sourceFile, sourceDuration, ranges, options.KeepAudio, plan, applyTransforms: false, cancellationToken);
                     await RenderCompositionAsync(safeComposition, outputFile, safeProfile, MediaTrimmingPreference.Fast, targetMb, progress, cancellationToken);
                 }
@@ -289,11 +293,10 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                             // Final rescue path for debugging: direct transcode can succeed where composition pipeline fails.
                             progress?.Report(new ExportProgress(0, "Final debug fallback: direct transcode (no edits)...", targetMb));
                             outputFile = await CreateOutputFileAsync(options.OutputPath, cancellationToken);
-                            if (await TryDirectTranscodeAsync(sourceFile, outputFile, options.KeepAudio, videoBitrateKbps, audioBitrateKbps, targetMb, progress, cancellationToken))
+                            if (await TryDirectTranscodeAsync(sourceFile, outputFile, options.KeepAudio, videoBitrateKbps, audioBitrateKbps, targetMb, selectedCodec, progress, cancellationToken))
                             {
                                 progress?.Report(new ExportProgress(100, "Completed (debug direct fallback)", targetMb));
-                                var rescueMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
-                                return new ExportResult(options.OutputPath, targetMb, rescueMb, videoBitrateKbps, audioBitrateKbps);
+                                return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, audioBitrateKbps, progress, cancellationToken);
                             }
 
                             if (canUseDirectDebugPath)
@@ -301,8 +304,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
                                 progress?.Report(new ExportProgress(0, "Final debug fallback: copying source file...", targetMb));
                                 await CopySourceAsDebugExportAsync(options.SourcePath, options.OutputPath, cancellationToken);
                                 progress?.Report(new ExportProgress(100, "Completed (source copy debug fallback)", targetMb));
-                                var copiedMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
-                                return new ExportResult(options.OutputPath, copiedMb, copiedMb, videoBitrateKbps, audioBitrateKbps);
+                                return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, audioBitrateKbps, progress, cancellationToken);
                             }
 
                             throw new InvalidOperationException(
@@ -333,8 +335,109 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
             }
         }
 
+        return await CreateExportResultAsync(options, effectiveDuration, targetMb, videoBitrateKbps, audioBitrateKbps, progress, cancellationToken);
+    }
+
+    private static async Task<ExportResult> CreateExportResultAsync(
+        ExportOptions options,
+        TimeSpan effectiveDuration,
+        double targetMb,
+        int videoBitrateKbps,
+        int audioBitrateKbps,
+        IProgress<ExportProgress>? progress,
+        CancellationToken cancellationToken)
+    {
         var actualMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
+
+        if (options.Preset == ExportPreset.EightMb && actualMb > EightMbPresetHardLimitMb)
+        {
+            progress?.Report(new ExportProgress(0, "8MB preset exceeded 10MB. Applying Discord-size correction...", targetMb));
+            await EnforceEightMbHardLimitAsync(options.OutputPath, effectiveDuration, options.KeepAudio, progress, cancellationToken);
+            actualMb = new FileInfo(options.OutputPath).Length / (1024d * 1024d);
+        }
+
         return new ExportResult(options.OutputPath, targetMb, actualMb, videoBitrateKbps, audioBitrateKbps);
+    }
+
+    private static async Task EnforceEightMbHardLimitAsync(
+        string outputPath,
+        TimeSpan effectiveDuration,
+        bool keepAudio,
+        IProgress<ExportProgress>? progress,
+        CancellationToken cancellationToken)
+    {
+        var durationSeconds = Math.Max(1d, effectiveDuration.TotalSeconds);
+
+        // Up to two corrective passes to stay under 10 MB for Discord uploads.
+        foreach (var targetMb in new[] { EightMbPresetCorrectionTargetMb, 8.8 })
+        {
+            var tempPath = Path.Combine(
+                Path.GetDirectoryName(outputPath) ?? string.Empty,
+                $"{Path.GetFileNameWithoutExtension(outputPath)}.discord-limit-{Guid.NewGuid():N}{Path.GetExtension(outputPath)}");
+
+            try
+            {
+                var inputFile = await StorageFile.GetFileFromPathAsync(outputPath);
+                var tempOutput = await CreateOutputFileAsync(tempPath, cancellationToken);
+
+                var totalKbps = (int)Math.Floor((targetMb * 1024d * 1024d * 8d) / durationSeconds / 1000d);
+                var audioKbps = keepAudio ? (totalKbps <= 224 ? 64 : 96) : 0;
+                var videoKbps = Math.Max(300, totalKbps - audioKbps);
+
+                var profile = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Auto);
+                ForceMp4CodecAac(profile, ExportVideoCodec.H264, keepAudio);
+                profile.Video.Bitrate = (uint)Math.Max(300_000, videoKbps * 1000);
+                if (!keepAudio)
+                {
+                    profile.Audio = null;
+                }
+                else if (profile.Audio is not null)
+                {
+                    profile.Audio.Bitrate = (uint)Math.Max(64_000, audioKbps * 1000);
+                }
+
+                var transcoder = new MediaTranscoder
+                {
+                    HardwareAccelerationEnabled = false,
+                    AlwaysReencode = true,
+                };
+
+                var prepared = await transcoder.PrepareFileTranscodeAsync(inputFile, tempOutput, profile).AsTask(cancellationToken);
+                if (!prepared.CanTranscode)
+                {
+                    continue;
+                }
+
+                var transcode = prepared.TranscodeAsync();
+                transcode.Progress = (_, value) =>
+                {
+                    progress?.Report(new ExportProgress(value, "Applying Discord-size correction", targetMb));
+                };
+
+                await transcode.AsTask(cancellationToken);
+
+                File.Copy(tempPath, outputPath, overwrite: true);
+                var correctedMb = new FileInfo(outputPath).Length / (1024d * 1024d);
+                if (correctedMb <= EightMbPresetHardLimitMb)
+                {
+                    return;
+                }
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(tempPath))
+                    {
+                        File.Delete(tempPath);
+                    }
+                }
+                catch
+                {
+                    // Best-effort cleanup.
+                }
+            }
+        }
     }
 
     private static async Task<MediaComposition> BuildCompositionAsync(
@@ -346,9 +449,9 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         bool applyTransforms,
         CancellationToken cancellationToken)
     {
-        if (applyTransforms && plan.EnableCrop)
+        if (applyTransforms && (plan.EnableCrop || plan.EnableResize))
         {
-            return await BuildCompositionWithOverlayCropAsync(sourceFile, sourceDuration, ranges, keepAudio, plan, cancellationToken);
+            return await BuildCompositionWithOverlayTransformAsync(sourceFile, sourceDuration, ranges, keepAudio, plan, cancellationToken);
         }
 
         var composition = new MediaComposition();
@@ -376,7 +479,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         return composition;
     }
 
-    private static async Task<MediaComposition> BuildCompositionWithOverlayCropAsync(
+    private static async Task<MediaComposition> BuildCompositionWithOverlayTransformAsync(
         StorageFile sourceFile,
         TimeSpan sourceDuration,
         IReadOnlyList<(TimeSpan Start, TimeSpan End)> ranges,
@@ -387,14 +490,22 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         var composition = new MediaComposition();
         var layer = new MediaOverlayLayer();
 
-        var targetWidth = plan.EnableResize ? plan.ResizeWidth : plan.CropWidth;
-        var targetHeight = plan.EnableResize ? plan.ResizeHeight : plan.CropHeight;
+        var sourceRectX = plan.EnableCrop ? plan.CropX : 0;
+        var sourceRectY = plan.EnableCrop ? plan.CropY : 0;
+        var sourceRectW = plan.EnableCrop ? plan.CropWidth : plan.SourceWidth;
+        var sourceRectH = plan.EnableCrop ? plan.CropHeight : plan.SourceHeight;
+
+        var targetWidth = plan.EnableResize ? plan.ResizeWidth : sourceRectW;
+        var targetHeight = plan.EnableResize ? plan.ResizeHeight : sourceRectH;
 
         targetWidth = Math.Max(16, targetWidth);
         targetHeight = Math.Max(16, targetHeight);
 
-        var sx = plan.EnableResize ? targetWidth / (double)Math.Max(1, plan.CropWidth) : 1d;
-        var sy = plan.EnableResize ? targetHeight / (double)Math.Max(1, plan.CropHeight) : 1d;
+        sourceRectW = Math.Max(16, sourceRectW);
+        sourceRectH = Math.Max(16, sourceRectH);
+
+        var sx = targetWidth / (double)sourceRectW;
+        var sy = targetHeight / (double)sourceRectH;
 
         var cursor = TimeSpan.Zero;
 
@@ -431,7 +542,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
             };
             layer.Overlays.Add(blackOverlay);
 
-            // Cropped visual overlay (muted) renders only selected region.
+                // Transformed visual overlay (muted) renders crop and/or resize region.
             var sourceClip = await MediaClip.CreateFromFileAsync(sourceFile);
             sourceClip.TrimTimeFromStart = range.Start;
             sourceClip.TrimTimeFromEnd = sourceDuration - range.End;
@@ -441,8 +552,8 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
             {
                 Delay = cursor,
                 Position = new Windows.Foundation.Rect(
-                    -plan.CropX * sx,
-                    -plan.CropY * sy,
+                    -sourceRectX * sx,
+                    -sourceRectY * sy,
                     plan.SourceWidth * sx,
                     plan.SourceHeight * sy),
             };
@@ -459,10 +570,10 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         return composition;
     }
 
-    private static MediaEncodingProfile BuildTunedProfile(ExportOptions options, TransformPlan plan, int videoBitrateKbps, int audioBitrateKbps)
+    private static MediaEncodingProfile BuildTunedProfile(ExportOptions options, TransformPlan plan, int videoBitrateKbps, int audioBitrateKbps, ExportVideoCodec codec)
     {
         var profile = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Auto);
-        ForceMp4H264Aac(profile, options.KeepAudio);
+        ForceMp4CodecAac(profile, codec, options.KeepAudio);
         profile.Video.Bitrate = (uint)Math.Max(400_000, videoBitrateKbps * 1000);
 
         if (plan.EnableResize && !plan.EnableCrop)
@@ -488,14 +599,15 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         return profile;
     }
 
-    private static MediaEncodingProfile BuildCompatibilityProfile(ExportOptions options, TransformPlan plan)
+    private static MediaEncodingProfile BuildCompatibilityProfile(ExportOptions options, TransformPlan plan, int videoBitrateKbps, int audioBitrateKbps, ExportVideoCodec codec)
     {
         var quality = plan.EnableResize || plan.EnableCrop
             ? (plan.EnableResize ? PickQuality(plan.ResizeWidth, plan.ResizeHeight) : PickQuality(plan.CropWidth, plan.CropHeight))
             : VideoEncodingQuality.Auto;
 
         var profile = MediaEncodingProfile.CreateMp4(quality);
-        ForceMp4H264Aac(profile, options.KeepAudio);
+        ForceMp4CodecAac(profile, codec, options.KeepAudio);
+        profile.Video.Bitrate = (uint)Math.Max(400_000, videoBitrateKbps * 1000);
 
         if (plan.EnableResize && !plan.EnableCrop)
         {
@@ -511,6 +623,10 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         if (!options.KeepAudio)
         {
             profile.Audio = null;
+        }
+        else if (profile.Audio is not null)
+        {
+            profile.Audio.Bitrate = (uint)Math.Max(64_000, audioBitrateKbps * 1000);
         }
 
         return profile;
@@ -616,7 +732,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         }
 
         var effectiveProfile = profile ?? MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Auto);
-        ForceMp4H264Aac(effectiveProfile, keepAudio: effectiveProfile.Audio is not null);
+        ForceMp4CodecAac(effectiveProfile, InferCodecFromProfile(effectiveProfile), keepAudio: effectiveProfile.Audio is not null);
 
         using IRandomAccessStream outStream = await outputFile.OpenAsync(FileAccessMode.ReadWrite).AsTask(cancellationToken);
         var transcoder = new MediaTranscoder
@@ -714,6 +830,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         int videoBitrateKbps,
         int audioBitrateKbps,
         double targetMb,
+        ExportVideoCodec codec,
         IProgress<ExportProgress>? progress,
         CancellationToken cancellationToken)
     {
@@ -723,7 +840,7 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         {
             cancellationToken.ThrowIfCancellationRequested();
             var profile = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Auto);
-            ForceMp4H264Aac(profile, withAudio);
+            ForceMp4CodecAac(profile, codec, withAudio);
             profile.Video.Bitrate = (uint)Math.Max(400_000, videoBitrateKbps * 1000);
             if (!withAudio)
             {
@@ -931,14 +1048,21 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         return ex is OperationCanceledException || cancellationToken.IsCancellationRequested;
     }
 
-    private static void ForceMp4H264Aac(MediaEncodingProfile profile, bool keepAudio)
+    private static void ForceMp4CodecAac(MediaEncodingProfile profile, ExportVideoCodec codec, bool keepAudio)
     {
         profile.Container.Subtype = "MPEG4";
-        profile.Video.Subtype = "H264";
+        profile.Video.Subtype = codec == ExportVideoCodec.Hevc ? "HEVC" : "H264";
         if (keepAudio && profile.Audio is not null)
         {
             profile.Audio.Subtype = "AAC";
         }
+    }
+
+    private static ExportVideoCodec InferCodecFromProfile(MediaEncodingProfile profile)
+    {
+        return string.Equals(profile.Video?.Subtype, "HEVC", StringComparison.OrdinalIgnoreCase)
+            ? ExportVideoCodec.Hevc
+            : ExportVideoCodec.H264;
     }
 
     private static async Task TryReadSourceMetadataAsync(StorageFile sourceFile, Action<(TimeSpan Duration, int Width, int Height)> assign)
@@ -1269,16 +1393,31 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
     private static (int VideoKbps, int AudioKbps, double TargetMb) CalculateEncodingTargets(ExportOptions options, TimeSpan effectiveDuration)
     {
         var durationSeconds = Math.Max(1d, effectiveDuration.TotalSeconds);
+        var width = options.EnableResize ? options.ResizeWidth : (options.EnableCrop ? options.CropWidth : 1280);
+        var height = options.EnableResize ? options.ResizeHeight : (options.EnableCrop ? options.CropHeight : 720);
+
+        width = Math.Max(16, width);
+        height = Math.Max(16, height);
+
+        var pixelFactor = Math.Max(0.2, (width * (double)height) / (1280d * 720d));
+        var fpsFactor = Math.Max(0.5, options.FrameRate / 30d);
+        var balancedVideo = (int)Math.Round(2800d * Math.Pow(pixelFactor, 0.65) * Math.Sqrt(fpsFactor));
+        balancedVideo = Math.Clamp(balancedVideo, 2200, 9000);
+        var balancedPlusVideo = (int)Math.Round(balancedVideo * 1.35);
+        balancedPlusVideo = Math.Clamp(balancedPlusVideo, 3000, 14000);
 
         if (options.Preset == ExportPreset.Balanced)
         {
             var audio = options.KeepAudio ? 128 : 0;
-            var width = options.EnableResize ? options.ResizeWidth : 1280;
-            var height = options.EnableResize ? options.ResizeHeight : 720;
-            var pixelFactor = Math.Max(0.2, (width * (double)height) / (1280d * 720d));
-            var fpsFactor = Math.Max(0.5, options.FrameRate / 30d);
-            var video = (int)Math.Round(2800d * Math.Pow(pixelFactor, 0.65) * Math.Sqrt(fpsFactor));
-            video = Math.Clamp(video, 2200, 9000);
+            var video = balancedVideo;
+            var estimatedMb = ((video + audio) * durationSeconds * 1000d) / 8d / 1024d / 1024d;
+            return (video, audio, Math.Max(1, estimatedMb));
+        }
+
+        if (options.Preset == ExportPreset.BalancedPlus)
+        {
+            var audio = options.KeepAudio ? 128 : 0;
+            var video = balancedPlusVideo;
             var estimatedMb = ((video + audio) * durationSeconds * 1000d) / 8d / 1024d / 1024d;
             return (video, audio, Math.Max(1, estimatedMb));
         }
@@ -1292,7 +1431,24 @@ public sealed class NativeVideoPostProcessor : IVideoPostProcessor
         var targetBits = targetMb * 1024d * 1024d * 8d;
         var totalKbps = (int)Math.Floor(targetBits / durationSeconds / 1000d);
         var audioBitrate = options.KeepAudio ? (totalKbps <= 256 ? 64 : 128) : 0;
-        var videoBitrate = Math.Max(300, totalKbps - audioBitrate);
-        return (videoBitrate, audioBitrate, targetMb);
+        var requestedVideoBitrate = Math.Max(300, totalKbps - audioBitrate);
+
+        if (options.Preset == ExportPreset.EightMb)
+        {
+            return (requestedVideoBitrate, audioBitrate, targetMb);
+        }
+
+        // Preserve visual quality for constrained-size presets with a capped floor for size accuracy.
+        var qualityFloorVideo = (int)Math.Round(balancedVideo * 0.75);
+        qualityFloorVideo = Math.Clamp(qualityFloorVideo, 1500, 10000);
+        var floorAppliedVideo = Math.Max(requestedVideoBitrate, qualityFloorVideo);
+
+        var maxTotalKbps = (int)Math.Round(totalKbps * 1.25); // e.g. 8 MB -> about 10 MB max
+        var maxVideoKbps = Math.Max(300, maxTotalKbps - audioBitrate);
+        var videoBitrate = Math.Min(floorAppliedVideo, maxVideoKbps);
+
+        var effectiveTotalKbps = videoBitrate + audioBitrate;
+        var effectiveTargetMb = Math.Max(1, (effectiveTotalKbps * durationSeconds * 1000d) / 8d / 1024d / 1024d);
+        return (videoBitrate, audioBitrate, effectiveTargetMb);
     }
 }

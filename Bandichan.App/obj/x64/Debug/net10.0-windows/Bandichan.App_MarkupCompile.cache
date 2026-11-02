@@ -1,5 +1,5 @@
 ﻿Bandichan.App
-
+1.0.0.0
 
 winexe
 C#
@@ -12,9 +12,9 @@ TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_O
 C:\Users\linoc\repo\bandichan\Bandichan.App\App.xaml
 51053321375
 
-12-403406242
+14-1531593246
 220-492524446
 EditorWindow.xaml;ExportCompletedWindow.xaml;MainWindow.xaml;MonitorPickerWindow.xaml;SettingsWindow.xaml;
 
-False
+True
 

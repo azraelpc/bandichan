@@ -24,28 +24,78 @@ public sealed class NativeScreenRecordingService : IRecordingService
         Directory.CreateDirectory(request.OutputDirectory);
         var outputPath = Path.Combine(request.OutputDirectory, $"recording_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.mp4");
 
-        var options = BuildOptions(request);
-        var recorder = Recorder.CreateRecorder(options);
-        var completion = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-        recorder.OnRecordingComplete += (_, e) =>
+        var startAttempts = new List<(bool IncludeAudio, bool HardwareEncoding)>
         {
-            _isRecording = false;
-            completion.TrySetResult(string.IsNullOrWhiteSpace(e.FilePath) ? outputPath : e.FilePath);
-        };
-        recorder.OnRecordingFailed += (_, e) =>
-        {
-            _isRecording = false;
-            completion.TrySetException(new InvalidOperationException($"Native recorder failed: {e.Error}"));
+            (request.IncludeSystemAudio, true),
         };
 
-        recorder.Record(outputPath);
+        if (request.IncludeSystemAudio)
+        {
+            startAttempts.Add((false, true));
+        }
 
-        _isRecording = true;
-        _recorder = recorder;
-        _completion = completion;
-        _session = new RecordingSession(outputPath, new CodecPreference("h264_mf", "aac", "mp4"), request.IncludeSystemAudio);
-        return Task.FromResult(_session);
+        startAttempts.Add((request.IncludeSystemAudio, false));
+        if (request.IncludeSystemAudio)
+        {
+            startAttempts.Add((false, false));
+        }
+
+        Exception? lastError = null;
+        var attemptNumber = 0;
+
+        foreach (var attempt in startAttempts.Distinct())
+        {
+            attemptNumber++;
+            Recorder? recorder = null;
+            try
+            {
+                var attemptOutputPath = attemptNumber == 1
+                    ? outputPath
+                    : Path.Combine(
+                        request.OutputDirectory,
+                        $"recording_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}_retry{attemptNumber}.mp4");
+
+                var attemptRequest = request with { IncludeSystemAudio = attempt.IncludeAudio };
+                var options = BuildOptions(attemptRequest, attempt.HardwareEncoding);
+                recorder = Recorder.CreateRecorder(options);
+
+                var completion = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+                recorder.OnRecordingComplete += (_, e) =>
+                {
+                    _isRecording = false;
+                    completion.TrySetResult(string.IsNullOrWhiteSpace(e.FilePath) ? attemptOutputPath : e.FilePath);
+                };
+                recorder.OnRecordingFailed += (_, e) =>
+                {
+                    _isRecording = false;
+                    completion.TrySetException(new InvalidOperationException($"Native recorder failed: {e.Error}"));
+                };
+
+                recorder.Record(attemptOutputPath);
+
+                _isRecording = true;
+                _recorder = recorder;
+                _completion = completion;
+                _session = new RecordingSession(attemptOutputPath, new CodecPreference("h264_mf", "aac", "mp4"), attempt.IncludeAudio);
+                return Task.FromResult(_session);
+            }
+            catch (Exception ex)
+            {
+                lastError = ex;
+                try
+                {
+                    recorder?.Dispose();
+                }
+                catch
+                {
+                    // Best effort cleanup between retries.
+                }
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Could not start native recorder after compatibility retries. {lastError?.Message}",
+            lastError);
     }
 
     public async Task<RecordingSession?> StopAsync(CancellationToken cancellationToken = default)
@@ -102,7 +152,7 @@ public sealed class NativeScreenRecordingService : IRecordingService
         return completed;
     }
 
-    private static RecorderOptions BuildOptions(RecordingRequest request)
+    private static RecorderOptions BuildOptions(RecordingRequest request, bool hardwareEncodingEnabled)
     {
         var displaySource = new DisplayRecordingSource(request.Monitor.Id);
         var sources = new List<RecordingSourceBase> { displaySource };
@@ -140,7 +190,7 @@ public sealed class NativeScreenRecordingService : IRecordingService
             {
                 Framerate = request.FrameRate,
                 IsFixedFramerate = true,
-                IsHardwareEncodingEnabled = true,
+                IsHardwareEncodingEnabled = hardwareEncodingEnabled,
                 IsMp4FastStartEnabled = true,
                 Encoder = new H264VideoEncoder
                 {

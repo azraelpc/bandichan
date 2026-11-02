@@ -12,9 +12,11 @@ Bandichan es una app de grabacion de pantalla para Windows con flujo tray-first 
 ## Estado actual
 
 - Grabacion nativa: estable (ScreenRecorderLib + Media Foundation).
+- Arranque de grabacion: robusto con reintentos de compatibilidad (audio/hardware encoding).
 - Export con resize: estable.
 - Export con crop: estabilizado con pipeline visual por overlays (sin CropRectangle directo).
 - Audio en export con crop: conservado mediante clip base con audio + overlays de video muteados.
+- Preset 8MB orientado a Discord con limite duro de 10MB (correccion automatica si se excede).
 - App en bandeja: estados Idle / Recording / Processing / Editing con transiciones protegidas.
 - Single-instance: habilitado (si ya existe una instancia, la segunda termina).
 - Inicio con Windows: configurable desde tray (desactivado por defecto).
@@ -37,13 +39,16 @@ Bandichan es una app de grabacion de pantalla para Windows con flujo tray-first 
 - Resize con lock ratio.
 - Presets de export:
   - Balanced
-  - 8MB
-  - Custom (MB objetivo)
+  - Balanced+
+  - 8MB H.264
+  - 8MB H.265
+  - Custom H.264 (MB objetivo)
+  - Custom H.265 (MB objetivo)
 
 ### UX de bandeja
 
 - Arranque en tray.
-- Menu contextual: Start/Stop, Open, Settings, Run with Windows, Tray Icon Settings..., Exit.
+- Menu contextual: Start/Stop, Import Video, Open, Settings, Run with Windows, Tray Icon Settings..., Exit.
 - Main window no bloqueante (se oculta al cerrar salvo salida explicita).
 - Onboarding de visibilidad del icono: tip one-shot para abrir Taskbar settings en Windows 11.
 
@@ -96,7 +101,7 @@ Campos principales:
 ## Flujo de uso rapido
 
 1. Ejecuta la app.
-2. Usa icono de bandeja para Start Recording.
+2. Usa icono de bandeja para Start Recording (o Import Video para editar un archivo existente).
 3. Selecciona monitor.
   - El monitor donde esta visible el selector se marca como: "This display (where this window is shown)".
 4. Stop Recording desde bandeja.
@@ -127,16 +132,21 @@ Nota: si `dotnet run` devuelve codigo `1` de forma intermitente, normalmente hay
 dotnet test .\Bandichan.Tests\Bandichan.Tests.csproj -c Debug
 ```
 
-### Publicar Release (single-file self-contained)
+### Publicar Release (self-contained multi-file, recomendado)
 
 ```powershell
-dotnet publish .\Bandichan.App\Bandichan.App.csproj -c Release -r win-x64
+dotnet publish .\Bandichan.App\Bandichan.App.csproj -c Release -r win-x64 --self-contained true -o .\publish\win-x64
 ```
 
 Salida tipica:
 
 - publish/win-x64/
 - Artefacto final principal: Bandichan.App.exe
+
+Nota:
+
+- El publish actual no usa single-file por compatibilidad con dependencias nativas de captura.
+- Se limitan recursos satelite a `en;es` para reducir carpetas de idioma.
 
 ## Runner de diagnostico (headless)
 
@@ -166,6 +176,16 @@ dotnet run --project .\Bandichan.DebugRunner\Bandichan.DebugRunner.csproj -- `
   - overlays se usan para recorte visual y canvas.
 - Reintentos de compatibilidad de perfil y render.
 - Objetivo: preservar ediciones sin rutas destructivas.
+
+### Objetivos de tamano
+
+- Preset 8MB:
+  - codec seleccionable (H.264/H.265)
+  - objetivo de tamano para Discord
+  - limite duro de 10MB con pasada correctiva automatica si el resultado lo excede
+- Presets Custom:
+  - variantes H.264 y H.265
+  - priorizan calidad manteniendo control de tamano
 
 ## Troubleshooting
 
@@ -210,6 +230,13 @@ dotnet run --project .\Bandichan.App\Bandichan.App.csproj
 - Prueba Audio test en Settings.
 - Selecciona Auto loopback o dispositivo especifico.
 
+### Could not start recording
+
+- Bandichan intenta arranque con varias combinaciones de compatibilidad:
+  - con/sin audio de sistema
+  - hardware encoding on/off
+- Si un monitor falla al iniciar, la app reintenta en monitor primario.
+
 ### Export con crop da problemas en una maquina
 
 - Prueba preset Balanced.
@@ -221,6 +248,7 @@ dotnet run --project .\Bandichan.App\Bandichan.App.csproj
 - El pipeline nativo de Windows puede variar segun stack de codecs/driver.
 - Los escenarios mas sensibles son crop + media exotica + audio.
 - El proyecto prioriza estabilidad en export final y control de fallback.
+- El modo single-file puede romper dependencias nativas de captura en algunos equipos.
 
 ## Estructura de carpetas recomendada
 

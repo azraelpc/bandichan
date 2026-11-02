@@ -44,10 +44,13 @@
                 <CheckBox x:Name="LockAspectCheck" Margin="10,0,0,0" Content="Lock ratio" IsChecked="True" VerticalAlignment="Center" />
                 <CheckBox x:Name="AudioEnabled" Margin="16,0,0,0" Content="Keep audio" IsChecked="True" VerticalAlignment="Center" />
                 <TextBlock Text="Preset" Margin="16,0,6,0" VerticalAlignment="Center" />
-                <ComboBox x:Name="PresetCombo" Width="140" SelectedIndex="0">
+                <ComboBox x:Name="PresetCombo" Width="160" SelectedIndex="0">
                     <ComboBoxItem Content="Balanced" />
-                    <ComboBoxItem Content="8MB" />
-                    <ComboBoxItem Content="Custom" />
+                    <ComboBoxItem Content="Balanced+" />
+                    <ComboBoxItem Content="8MB H.264" />
+                    <ComboBoxItem Content="8MB H.265" />
+                    <ComboBoxItem Content="Custom H.264" />
+                    <ComboBoxItem Content="Custom H.265" />
                 </ComboBox>
                 <TextBlock Text="Custom MB" Margin="12,0,6,0" VerticalAlignment="Center" />
                 <TextBox x:Name="CustomTargetMb" Width="70" Text="24" IsEnabled="False" />

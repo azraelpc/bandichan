@@ -18,12 +18,6 @@
           "buildTransitive/CommunityToolkit.Mvvm.targets": {}
         }
       },
-      "Microsoft.NET.ILLink.Tasks/10.0.12": {
-        "type": "package",
-        "build": {
-          "build/Microsoft.NET.ILLink.Tasks.props": {}
-        }
-      },
       "Microsoft.Windows.CsWinRT/0.1.0-prerelease.200629.3": {
         "type": "package",
         "compile": {
@@ -99,12 +93,6 @@
         },
         "build": {
           "buildTransitive/CommunityToolkit.Mvvm.targets": {}
-        }
-      },
-      "Microsoft.NET.ILLink.Tasks/10.0.12": {
-        "type": "package",
-        "build": {
-          "build/Microsoft.NET.ILLink.Tasks.props": {}
         }
       },
       "Microsoft.Windows.CsWinRT/0.1.0-prerelease.200629.3": {
@@ -209,56 +197,6 @@
         "lib/netstandard2.1/CommunityToolkit.Mvvm.xml"
       ]
     },
-    "Microsoft.NET.ILLink.Tasks/10.0.12": {
-      "sha512": "xi+BDjFpW+Sb+MHFHaH6Y/gV9I8BluFwRXc1QyCdoZbIK26eNiBeFuMTe/FMwc33G1wdHCyDg7CVTmb8OdQrMQ==",
-      "type": "package",
-      "path": "microsoft.net.illink.tasks/10.0.12",
-      "hasTools": true,
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "Sdk/Sdk.props",
-        "THIRD-PARTY-NOTICES.TXT",
-        "analyzers/dotnet/cs/ILLink.CodeFixProvider.dll",
-        "analyzers/dotnet/cs/ILLink.RoslynAnalyzer.dll",
-        "build/Microsoft.NET.ILLink.Analyzers.props",
-        "build/Microsoft.NET.ILLink.Tasks.props",
-        "build/Microsoft.NET.ILLink.targets",
-        "microsoft.net.illink.tasks.10.0.12.nupkg.sha512",
-        "microsoft.net.illink.tasks.nuspec",
-        "tools/net/ILLink.Tasks.deps.json",
-        "tools/net/ILLink.Tasks.dll",
-        "tools/net/Mono.Cecil.Mdb.dll",
-        "tools/net/Mono.Cecil.Pdb.dll",
-        "tools/net/Mono.Cecil.Rocks.dll",
-        "tools/net/Mono.Cecil.dll",
-        "tools/net/Sdk/Sdk.props",
-        "tools/net/build/Microsoft.NET.ILLink.Analyzers.props",
-        "tools/net/build/Microsoft.NET.ILLink.Tasks.props",
-        "tools/net/build/Microsoft.NET.ILLink.targets",
-        "tools/net/illink.deps.json",
-        "tools/net/illink.dll",
-        "tools/net/illink.runtimeconfig.json",
-        "tools/netframework/ILLink.Tasks.dll",
-        "tools/netframework/ILLink.Tasks.dll.config",
-        "tools/netframework/Mono.Cecil.Mdb.dll",
-        "tools/netframework/Mono.Cecil.Pdb.dll",
-        "tools/netframework/Mono.Cecil.Rocks.dll",
-        "tools/netframework/Mono.Cecil.dll",
-        "tools/netframework/Sdk/Sdk.props",
-        "tools/netframework/System.Buffers.dll",
-        "tools/netframework/System.Collections.Immutable.dll",
-        "tools/netframework/System.Memory.dll",
-        "tools/netframework/System.Numerics.Vectors.dll",
-        "tools/netframework/System.Reflection.Metadata.dll",
-        "tools/netframework/System.Runtime.CompilerServices.Unsafe.dll",
-        "tools/netframework/build/Microsoft.NET.ILLink.Analyzers.props",
-        "tools/netframework/build/Microsoft.NET.ILLink.Tasks.props",
-        "tools/netframework/build/Microsoft.NET.ILLink.targets",
-        "useSharedDesignerContext.txt"
-      ]
-    },
     "Microsoft.Windows.CsWinRT/0.1.0-prerelease.200629.3": {
       "sha512": "+w4zLxMF9+dpdrpQCp7iup8Y+GGq9iZ3M1SmBTLvXT49m2PKk2e7Wx8XjomKWowMNUBKds6zlEAapweqcBpA7w==",
       "type": "package",
@@ -331,7 +269,6 @@
       "Bandichan.Core >= 1.0.0",
       "Bandichan.Infrastructure >= 1.0.0",
       "CommunityToolkit.Mvvm >= 8.4.2",
-      "Microsoft.NET.ILLink.Tasks >= 10.0.12",
       "ScreenRecorderLib >= 7.0.1"
     ]
   },
@@ -392,12 +329,6 @@
           "CommunityToolkit.Mvvm": {
             "target": "Package",
             "version": "[8.4.2, )"
-          },
-          "Microsoft.NET.ILLink.Tasks": {
-            "suppressParent": "All",
-            "target": "Package",
-            "version": "[10.0.12, )",
-            "autoReferenced": true
           },
           "ScreenRecorderLib": {
             "include": "Runtime, Compile, Native, ContentFiles, Analyzers, BuildTransitive",

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Bandichan.App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b2a589605cecdbaf649f0cee5f548be2f8a052b9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+76dbd87431cb91c9a05c4c505693dcae89fc4fee")]
 [assembly: System.Reflection.AssemblyProductAttribute("Bandichan.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Bandichan.App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

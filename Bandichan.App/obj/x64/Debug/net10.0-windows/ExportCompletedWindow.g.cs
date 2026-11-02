@@ -60,7 +60,7 @@ namespace Bandichan.App {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/Bandichan.App;component/exportcompletedwindow.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/Bandichan.App;V1.0.0.0;component/exportcompletedwindow.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\ExportCompletedWindow.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

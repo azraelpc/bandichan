@@ -3,8 +3,15 @@ namespace Bandichan.Core;
 public enum ExportPreset
 {
     Balanced,
+    BalancedPlus,
     EightMb,
     Custom,
+}
+
+public enum ExportVideoCodec
+{
+    H264,
+    Hevc,
 }
 
 public sealed record FrameRange(int StartFrame, int EndFrame)
@@ -29,7 +36,8 @@ public sealed record ExportOptions(
     ExportPreset Preset,
     double CustomTargetMb,
     IReadOnlyList<FrameRange> DeletedSegments,
-    double SourceDurationSeconds = 0);
+    double SourceDurationSeconds = 0,
+    ExportVideoCodec TargetCodec = ExportVideoCodec.H264);
 
 public sealed record ExportResult(
     string OutputPath,

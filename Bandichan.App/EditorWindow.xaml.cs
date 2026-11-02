@@ -355,9 +355,15 @@ public partial class EditorWindow : Window
         var preset = PresetCombo.SelectedIndex switch
         {
             0 => ExportPreset.Balanced,
-            1 => ExportPreset.EightMb,
+            1 => ExportPreset.BalancedPlus,
+            2 => ExportPreset.EightMb,
+            3 => ExportPreset.EightMb,
             _ => ExportPreset.Custom,
         };
+
+        var targetCodec = PresetCombo.SelectedIndex is 3 or 5
+            ? ExportVideoCodec.Hevc
+            : ExportVideoCodec.H264;
 
         var customMb = 24d;
         if (!double.TryParse(CustomTargetMb.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out customMb))
@@ -386,7 +392,8 @@ public partial class EditorWindow : Window
             DeletedSegments: _deletedSegments.ToArray(),
             SourceDurationSeconds: _sourceDurationSeconds > 0
                 ? _sourceDurationSeconds
-                : _estimatedFrameCount / Math.Max(1d, _detectedFrameRateExact));
+                : _estimatedFrameCount / Math.Max(1d, _detectedFrameRateExact),
+            TargetCodec: targetCodec);
 
         return true;
     }
@@ -943,7 +950,7 @@ public partial class EditorWindow : Window
 
     private void UpdatePresetUiState()
     {
-        var isCustom = PresetCombo.SelectedIndex == 2;
+        var isCustom = PresetCombo.SelectedIndex is 4 or 5;
         CustomTargetMb.IsEnabled = isCustom;
     }
 
@@ -955,23 +962,34 @@ public partial class EditorWindow : Window
 
     private double GetSelectedTargetSizeMb()
     {
-        if (PresetCombo.SelectedIndex == 0)
-        {
-            return EstimateBalancedSizeMb();
-        }
-
-        return PresetCombo.SelectedIndex switch
-        {
-            1 => 8.0,
-            _ => ParseCustomTargetMb(),
-        };
-    }
-
-    private double EstimateBalancedSizeMb()
-    {
         var duration = Math.Max(1, _estimatedFrameCount / Math.Max(1d, _detectedFrameRateExact));
         var (width, height) = DetermineOutputResolution();
-        var (videoKbps, audioKbps) = EstimateBalancedBitrates(width, height, _detectedFrameRate, AudioEnabled.IsChecked == true);
+        var preset = PresetCombo.SelectedIndex switch
+        {
+            0 => ExportPreset.Balanced,
+            1 => ExportPreset.BalancedPlus,
+            2 => ExportPreset.EightMb,
+            3 => ExportPreset.EightMb,
+            _ => ExportPreset.Custom,
+        };
+
+        var requestedMb = preset switch
+        {
+            ExportPreset.Balanced => 0,
+            ExportPreset.BalancedPlus => 0,
+            ExportPreset.EightMb => 8.0,
+            _ => ParseCustomTargetMb(),
+        };
+
+        var (videoKbps, audioKbps) = EstimateBitratesWithQualityFloor(
+            width,
+            height,
+            _detectedFrameRate,
+            AudioEnabled.IsChecked == true,
+            preset,
+            duration,
+            requestedMb);
+
         var totalKbps = videoKbps + audioKbps;
         return Math.Max(1, (totalKbps * duration * 1000d) / 8d / 1024d / 1024d);
     }
@@ -997,15 +1015,54 @@ public partial class EditorWindow : Window
         return (_videoWidth, _videoHeight);
     }
 
-    private static (int VideoKbps, int AudioKbps) EstimateBalancedBitrates(int width, int height, int frameRate, bool keepAudio)
+    private static (int VideoKbps, int AudioKbps) EstimateBitratesWithQualityFloor(
+        int width,
+        int height,
+        int frameRate,
+        bool keepAudio,
+        ExportPreset preset,
+        double durationSeconds,
+        double requestedMb)
     {
+        var duration = Math.Max(1d, durationSeconds);
         var pixelFactor = Math.Max(0.2, (width * (double)height) / (1280d * 720d));
         var fpsFactor = Math.Max(0.5, frameRate / 30d);
-        var video = (int)Math.Round(2800d * Math.Pow(pixelFactor, 0.65) * Math.Sqrt(fpsFactor));
-        video = Math.Clamp(video, 2200, 9000);
-
         var audio = keepAudio ? 128 : 0;
-        return (video, audio);
+
+        var balancedVideo = (int)Math.Round(2800d * Math.Pow(pixelFactor, 0.65) * Math.Sqrt(fpsFactor));
+        balancedVideo = Math.Clamp(balancedVideo, 2200, 9000);
+
+        if (preset == ExportPreset.Balanced)
+        {
+            return (balancedVideo, audio);
+        }
+
+        var balancedPlusVideo = (int)Math.Round(balancedVideo * 1.35);
+        balancedPlusVideo = Math.Clamp(balancedPlusVideo, 3000, 14000);
+        if (preset == ExportPreset.BalancedPlus)
+        {
+            return (balancedPlusVideo, audio);
+        }
+
+        var targetBits = Math.Max(1d, requestedMb) * 1024d * 1024d * 8d;
+        var targetTotalKbps = (int)Math.Floor(targetBits / duration / 1000d);
+        var requestedAudio = keepAudio ? (targetTotalKbps <= 256 ? 64 : 128) : 0;
+        var requestedVideo = Math.Max(300, targetTotalKbps - requestedAudio);
+
+        if (preset == ExportPreset.EightMb)
+        {
+            return (requestedVideo, requestedAudio);
+        }
+
+        // Keep 8MB/custom from dropping to visibly blurry bitrates, but cap overshoot for size accuracy.
+        var qualityFloorVideo = (int)Math.Round(balancedVideo * 0.75);
+        qualityFloorVideo = Math.Clamp(qualityFloorVideo, 1500, 10000);
+        var floorAppliedVideo = Math.Max(requestedVideo, qualityFloorVideo);
+
+        var maxTotalKbps = (int)Math.Round(targetTotalKbps * 1.25); // e.g. 8 MB -> about 10 MB max
+        var maxVideoKbps = Math.Max(300, maxTotalKbps - requestedAudio);
+        var finalVideo = Math.Min(floorAppliedVideo, maxVideoKbps);
+        return (finalVideo, requestedAudio);
     }
 
     private double ParseCustomTargetMb()
@@ -1025,7 +1082,7 @@ public partial class EditorWindow : Window
 
     private static double EstimateTargetSizeMb(ExportOptions options)
     {
-        if (options.Preset == ExportPreset.Balanced)
+        if (options.Preset is ExportPreset.Balanced or ExportPreset.BalancedPlus)
         {
             return 0;
         }

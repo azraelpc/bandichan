@@ -18,6 +18,7 @@ public partial class App : System.Windows.Application
 	private EditorWindow? _editorWindow;
 	private Forms.NotifyIcon? _notifyIcon;
 	private Forms.ToolStripMenuItem? _toggleRecordingMenuItem;
+	private Forms.ToolStripMenuItem? _importVideoMenuItem;
 	private Forms.ToolStripMenuItem? _runWithWindowsMenuItem;
 	private bool _isExiting;
 	private System.Drawing.Icon? _idleIcon;
@@ -92,6 +93,7 @@ public partial class App : System.Windows.Application
 		_editingIcon = TrayIconFactory.CreateEditingIcon();
 
 		_toggleRecordingMenuItem = new Forms.ToolStripMenuItem("Start Recording", null, async (_, _) => await ToggleRecordingFromTrayAsync());
+		_importVideoMenuItem = new Forms.ToolStripMenuItem("Import Video", null, (_, _) => ImportVideoFromTray());
 		var openMenuItem = new Forms.ToolStripMenuItem("Open", null, (_, _) => ShowMainWindow());
 		var settingsMenuItem = new Forms.ToolStripMenuItem("Settings", null, (_, _) => OpenSettings());
 		var trayIconSettingsMenuItem = new Forms.ToolStripMenuItem("Tray Icon Settings...", null, (_, _) => OpenTrayIconSettings());
@@ -111,6 +113,7 @@ public partial class App : System.Windows.Application
 		};
 
 		_notifyIcon.ContextMenuStrip.Items.Add(_toggleRecordingMenuItem);
+		_notifyIcon.ContextMenuStrip.Items.Add(_importVideoMenuItem);
 		_notifyIcon.ContextMenuStrip.Items.Add(new Forms.ToolStripSeparator());
 		_notifyIcon.ContextMenuStrip.Items.Add(openMenuItem);
 		_notifyIcon.ContextMenuStrip.Items.Add(settingsMenuItem);
@@ -346,22 +349,64 @@ public partial class App : System.Windows.Application
 				Directory.CreateDirectory(outputDirectory);
 			}
 
-			var request = new RecordingRequest(
-				selected,
-				outputDirectory,
-				_settings.CaptureFrameRate,
-				IncludeSystemAudio: _settings.RecordSystemAudio,
-				SystemAudioDevice: _settings.SystemAudioDevice);
-			await _recordingService.StartAsync(request);
+			await StartRecordingForMonitorAsync(selected, outputDirectory);
 			_lastVideoCodec = _recordingService.CurrentSession?.Codec.VideoCodec;
 			UpdateUiForState(AppState.Recording);
 			_mainWindow?.Hide();
 		}
 		catch (Exception ex)
 		{
-			System.Windows.MessageBox.Show($"Could not start recording. {ex.Message}", "Bandichan", MessageBoxButton.OK, MessageBoxImage.Error);
+			var details = DescribeException(ex);
+			System.Windows.MessageBox.Show($"Could not start recording. {details}", "Bandichan", MessageBoxButton.OK, MessageBoxImage.Error);
 			UpdateUiForState(AppState.Idle);
 		}
+	}
+
+	private async Task StartRecordingForMonitorAsync(DisplayMonitor selected, string outputDirectory)
+	{
+		var request = new RecordingRequest(
+			selected,
+			outputDirectory,
+			_settings.CaptureFrameRate,
+			IncludeSystemAudio: _settings.RecordSystemAudio,
+			SystemAudioDevice: _settings.SystemAudioDevice);
+
+		try
+		{
+			await _recordingService.StartAsync(request);
+		}
+		catch (Exception firstError)
+		{
+			var primaryMonitor = MonitorDiscovery.GetMonitors().FirstOrDefault();
+			if (primaryMonitor is null || string.Equals(primaryMonitor.Id, selected.Id, StringComparison.OrdinalIgnoreCase))
+			{
+				throw;
+			}
+
+			// Retry with primary monitor when a specific monitor fails to initialize.
+			_recordingService = new NativeScreenRecordingService();
+			var fallbackRequest = request with { Monitor = primaryMonitor };
+			await _recordingService.StartAsync(fallbackRequest);
+
+			System.Windows.MessageBox.Show(
+				$"Selected monitor could not be started. Recording on primary monitor instead.\nFirst error: {DescribeException(firstError)}",
+				"Bandichan",
+				MessageBoxButton.OK,
+				MessageBoxImage.Information);
+		}
+	}
+
+	private static string DescribeException(Exception ex)
+	{
+		static string One(Exception e)
+		{
+			var message = string.IsNullOrWhiteSpace(e.Message) ? "(no message)" : e.Message;
+			return $"{e.GetType().Name} (0x{e.HResult:X8}): {message}";
+		}
+
+		return ex.InnerException is null
+			? One(ex)
+			: $"{One(ex)}\nCause: {DescribeException(ex.InnerException)}";
 	}
 
 	private async Task StopRecordingAsync()
@@ -420,6 +465,66 @@ public partial class App : System.Windows.Application
 		}
 	}
 
+	private void ImportVideoFromTray()
+	{
+		if (_state is AppState.Recording or AppState.Processing || _recordingService.IsRecording)
+		{
+			System.Windows.MessageBox.Show(
+				"Stop the current recording before importing a video.",
+				"Bandichan",
+				MessageBoxButton.OK,
+				MessageBoxImage.Information);
+			return;
+		}
+
+		var openDialog = new Microsoft.Win32.OpenFileDialog
+		{
+			Title = "Import Video",
+			CheckFileExists = true,
+			CheckPathExists = true,
+			Multiselect = false,
+			Filter = "Supported video files (*.mp4;*.mkv;*.mov;*.avi;*.wmv;*.webm;*.m4v;*.ts)|*.mp4;*.mkv;*.mov;*.avi;*.wmv;*.webm;*.m4v;*.ts|All files (*.*)|*.*",
+		};
+
+		if (openDialog.ShowDialog() != true)
+		{
+			return;
+		}
+
+		if (!File.Exists(openDialog.FileName))
+		{
+			System.Windows.MessageBox.Show(
+				"Selected file does not exist.",
+				"Bandichan",
+				MessageBoxButton.OK,
+				MessageBoxImage.Warning);
+			return;
+		}
+
+		try
+		{
+			UpdateUiForState(AppState.Editing);
+			_editorWindow?.Close();
+			_editorWindow = new EditorWindow(openDialog.FileName, _settings.EncoderMode);
+			_editorWindow.Closed += (_, _) =>
+			{
+				_editorWindow = null;
+				UpdateUiForState(AppState.Idle);
+			};
+			_editorWindow.Show();
+			_editorWindow.Activate();
+		}
+		catch (Exception ex)
+		{
+			System.Windows.MessageBox.Show(
+				$"Could not import video. {ex.Message}",
+				"Bandichan",
+				MessageBoxButton.OK,
+				MessageBoxImage.Error);
+			UpdateUiForState(AppState.Idle);
+		}
+	}
+
 	private void ShowMainWindow()
 	{
 		if (_mainWindow is null)
@@ -457,6 +562,11 @@ public partial class App : System.Windows.Application
 		if (_notifyIcon is null || _toggleRecordingMenuItem is null)
 		{
 			return;
+		}
+
+		if (_importVideoMenuItem is not null)
+		{
+			_importVideoMenuItem.Enabled = _state is not (AppState.Recording or AppState.Processing);
 		}
 
 		switch (_state)

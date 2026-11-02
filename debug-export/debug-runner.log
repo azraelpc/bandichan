@@ -19,3 +19,25 @@
 [2026-11-01 23:55:10] Attempt 1: recording created C:\Users\linoc\repo\bandichan\debug-export\attempt_001\recording_2026-11-01_23-55-06.mp4 (0,88 MB)
 [2026-11-01 23:55:10] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4
 [2026-11-01 23:55:12] Attempt 1: SUCCESS output=C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4 size=1,08 MB
+[2026-11-02 02:31:36] Starting headless debug recorder/export runner.
+[2026-11-02 02:31:36] OutputRoot=C:\Users\linoc\repo\bandichan\debug-export Seconds=2 Fps=30 KeepAudio=False MaxAttempts=1
+[2026-11-02 02:31:36] Monitor selected: \\.\DISPLAY4 (1920x1080) id=\\.\DISPLAY4
+[2026-11-02 02:31:36] Attempt 1: recording 2s...
+[2026-11-02 02:31:38] Attempt 1: recording created C:\Users\linoc\repo\bandichan\debug-export\attempt_001\recording_2026-11-02_02-31-36.mp4 (0,38 MB)
+[2026-11-02 02:31:39] Attempt 1: recorded audio tracks=0 selectedIndex=0
+[2026-11-02 02:31:39] Attempt 1: source props Width=1920 Height=1080 Duration=00:00:01.1333000
+[2026-11-02 02:31:39] Attempt 1: options Crop=False (0,0,0x0) Resize=False (0x0) KeepAudio=False
+[2026-11-02 02:31:39] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4
+[2026-11-02 02:31:40] Attempt 1: output audio tracks=0 selectedIndex=0
+[2026-11-02 02:31:40] Attempt 1: SUCCESS output=C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4 size=0,40 MB
+[2026-11-02 02:31:53] Starting headless debug recorder/export runner.
+[2026-11-02 02:31:54] OutputRoot=C:\Users\linoc\repo\bandichan\debug-export Seconds=2 Fps=30 KeepAudio=True MaxAttempts=1
+[2026-11-02 02:31:54] Monitor selected: \\.\DISPLAY4 (1920x1080) id=\\.\DISPLAY4
+[2026-11-02 02:31:54] Attempt 1: recording 2s...
+[2026-11-02 02:31:56] Attempt 1: recording created C:\Users\linoc\repo\bandichan\debug-export\attempt_001\recording_2026-11-02_02-31-54.mp4 (0,38 MB)
+[2026-11-02 02:31:56] Attempt 1: recorded audio tracks=1 selectedIndex=0
+[2026-11-02 02:31:56] Attempt 1: source props Width=1920 Height=1080 Duration=00:00:01.0666333
+[2026-11-02 02:31:56] Attempt 1: options Crop=False (0,0,0x0) Resize=False (0x0) KeepAudio=True
+[2026-11-02 02:31:56] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4
+[2026-11-02 02:31:57] Attempt 1: output audio tracks=1 selectedIndex=0
+[2026-11-02 02:31:57] Attempt 1: SUCCESS output=C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4 size=0,38 MB
