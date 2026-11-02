@@ -1,0 +1,21 @@
+[2026-11-01 23:52:09] Starting headless debug recorder/export runner.
+[2026-11-01 23:52:09] OutputRoot=C:\Users\linoc\repo\bandichan\debug-export Seconds=4 Fps=30 KeepAudio=False MaxAttempts=1
+[2026-11-01 23:52:09] Monitor selected: \\.\DISPLAY4 (1920x1080) id=\\.\DISPLAY4
+[2026-11-01 23:52:09] Attempt 1: recording 4s...
+[2026-11-01 23:52:13] Attempt 1: recording created C:\Users\linoc\repo\bandichan\debug-export\attempt_001\recording_2026-11-01_23-52-09.mp4 (0,66 MB)
+[2026-11-01 23:52:13] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4
+[2026-11-01 23:52:15] Attempt 1: SUCCESS output=C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4 size=0,87 MB
+[2026-11-01 23:54:08] Starting headless debug recorder/export runner.
+[2026-11-01 23:54:08] OutputRoot=C:\Users\linoc\repo\bandichan\debug-export Seconds=4 Fps=30 KeepAudio=False MaxAttempts=1
+[2026-11-01 23:54:09] Monitor selected: \\.\DISPLAY4 (1920x1080) id=\\.\DISPLAY4
+[2026-11-01 23:54:09] Attempt 1: recording 4s...
+[2026-11-01 23:54:13] Attempt 1: recording created C:\Users\linoc\repo\bandichan\debug-export\attempt_001\recording_2026-11-01_23-54-09.mp4 (0,61 MB)
+[2026-11-01 23:54:13] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4
+[2026-11-01 23:54:15] Attempt 1: SUCCESS output=C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4 size=0,80 MB
+[2026-11-01 23:55:06] Starting headless debug recorder/export runner.
+[2026-11-01 23:55:06] OutputRoot=C:\Users\linoc\repo\bandichan\debug-export Seconds=4 Fps=30 KeepAudio=True MaxAttempts=1
+[2026-11-01 23:55:06] Monitor selected: \\.\DISPLAY4 (1920x1080) id=\\.\DISPLAY4
+[2026-11-01 23:55:06] Attempt 1: recording 4s...
+[2026-11-01 23:55:10] Attempt 1: recording created C:\Users\linoc\repo\bandichan\debug-export\attempt_001\recording_2026-11-01_23-55-06.mp4 (0,88 MB)
+[2026-11-01 23:55:10] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4
+[2026-11-01 23:55:12] Attempt 1: SUCCESS output=C:\Users\linoc\repo\bandichan\debug-export\export_attempt_001.mp4 size=1,08 MB

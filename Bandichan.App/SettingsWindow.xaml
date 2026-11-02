@@ -1,0 +1,76 @@
+<Window x:Class="Bandichan.App.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Bandichan Settings"
+        Icon="pack://application:,,,/Assets/bandichan.ico"
+        Height="620"
+        Width="760"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Default output folder" FontWeight="SemiBold" />
+        <DockPanel Grid.Row="1" Margin="0,8,0,0">
+            <TextBox x:Name="OutputFolderText" MinWidth="420" IsReadOnly="True" />
+            <Button Width="120" Margin="8,0,0,0" Click="BrowseOutputClick">Browse...</Button>
+        </DockPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,14,0,0">
+            <TextBlock Text="Encoder mode" FontWeight="SemiBold" />
+            <ComboBox x:Name="EncoderModeCombo" Margin="0,8,0,0" Width="280" HorizontalAlignment="Left" SelectedIndex="0">
+                <ComboBoxItem Content="Auto (prefer efficiency / HEVC if available)" />
+                <ComboBoxItem Content="Compatibility (prefer H.264)" />
+            </ComboBox>
+
+            <TextBlock Text="Video capture" FontWeight="SemiBold" Margin="0,16,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <TextBlock Text="Frame rate" VerticalAlignment="Center" />
+                <ComboBox x:Name="FrameRateCombo" Width="120" Margin="10,0,0,0" SelectedIndex="0">
+                    <ComboBoxItem Content="30 FPS" />
+                    <ComboBoxItem Content="60 FPS" />
+                </ComboBox>
+            </StackPanel>
+
+            <TextBlock Text="Audio capture" FontWeight="SemiBold" Margin="0,16,0,0" />
+            <CheckBox x:Name="RecordSystemAudioCheck"
+                      Margin="0,8,0,0"
+                      IsChecked="True"
+                      Content="Record system audio (desktop sound)" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <TextBlock Text="System audio source" VerticalAlignment="Center" />
+                <ComboBox x:Name="AudioDeviceCombo" Width="460" Margin="10,0,0,0" />
+            </StackPanel>
+        </StackPanel>
+
+        <Grid Grid.Row="3" Margin="0,14,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Quick test" FontWeight="SemiBold" />
+                <Button Width="150" Margin="0,8,0,0" Click="TestAudioClick">Test Audio</Button>
+                <Button Width="150" Margin="0,8,0,0" Click="TestVideoClick">Test Video</Button>
+                <TextBlock x:Name="AudioTestStatusText" Margin="0,10,0,0" TextWrapping="Wrap" Text="Audio test status: not started." />
+                <TextBlock x:Name="VideoTestStatusText" Margin="0,8,0,0" TextWrapping="Wrap" Text="Video test status: not started." />
+            </StackPanel>
+
+            <Border Grid.Column="1" Margin="12,0,0,0" BorderBrush="#CCC" BorderThickness="1" CornerRadius="4" Padding="8" Background="#111">
+                <Image x:Name="VideoPreviewImage" Stretch="Uniform" Height="220" />
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Width="100" Margin="0,0,8,0" Click="CancelClick">Cancel</Button>
+            <Button Width="100" IsDefault="True" Click="SaveClick">Save</Button>
+        </StackPanel>
+    </Grid>
+</Window>

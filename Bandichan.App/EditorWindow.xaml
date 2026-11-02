@@ -1,0 +1,106 @@
+<Window x:Class="Bandichan.App.EditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Bandichan Editor"
+        Icon="pack://application:,,,/Assets/bandichan.ico"
+        Height="620"
+    Width="1060"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="SourcePathText" FontWeight="SemiBold" TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,0">
+            <Button x:Name="PlayPauseButton" Width="100" Click="PlayPauseClick">Play</Button>
+            <Button Width="100" Click="PrevFrameClick">Prev Frame</Button>
+            <Button Width="100" Margin="8,0,0,0" Click="NextFrameClick">Next Frame</Button>
+            <Button Width="100" Margin="8,0,0,0" Click="SetInClick">Set In (A)</Button>
+            <Button Width="100" Margin="8,0,0,0" Click="SetOutClick">Set Out (B)</Button>
+            <Button Width="160" Margin="8,0,0,0" Click="DeleteSegmentClick">Delete Selected Segment</Button>
+            <Button Width="120" Margin="8,0,0,0" Click="UndoLastCutClick">Undo Last Cut</Button>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="0,12,0,0">
+            <TextBlock x:Name="SelectionText" Text="Selection: none" />
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <CheckBox x:Name="CropEnabled" Content="Crop" VerticalAlignment="Center" />
+                <TextBox x:Name="CropX" Width="54" Margin="8,0,0,0" Text="0" />
+                <TextBox x:Name="CropY" Width="54" Margin="8,0,0,0" Text="0" />
+                <TextBox x:Name="CropW" Width="70" Margin="8,0,0,0" Text="1280" />
+                <TextBox x:Name="CropH" Width="70" Margin="8,0,0,0" Text="720" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                <CheckBox x:Name="ResizeEnabled" Content="Resize" VerticalAlignment="Center" />
+                <TextBox x:Name="ResizeW" Width="70" Margin="8,0,0,0" Text="1280" />
+                <TextBlock Text="x" Margin="4,0,4,0" VerticalAlignment="Center" />
+                <TextBox x:Name="ResizeH" Width="70" Margin="8,0,0,0" Text="720" />
+                <CheckBox x:Name="LockAspectCheck" Margin="10,0,0,0" Content="Lock ratio" IsChecked="True" VerticalAlignment="Center" />
+                <CheckBox x:Name="AudioEnabled" Margin="16,0,0,0" Content="Keep audio" IsChecked="True" VerticalAlignment="Center" />
+                <TextBlock Text="Preset" Margin="16,0,6,0" VerticalAlignment="Center" />
+                <ComboBox x:Name="PresetCombo" Width="140" SelectedIndex="0">
+                    <ComboBoxItem Content="Balanced" />
+                    <ComboBoxItem Content="8MB" />
+                    <ComboBoxItem Content="Custom" />
+                </ComboBox>
+                <TextBlock Text="Custom MB" Margin="12,0,6,0" VerticalAlignment="Center" />
+                <TextBox x:Name="CustomTargetMb" Width="70" Text="24" IsEnabled="False" />
+                <TextBlock x:Name="EstimatedSizeText" Margin="16,0,0,0" VerticalAlignment="Center" Text="Estimated final size: 8.0 MB" />
+            </StackPanel>
+        </StackPanel>
+
+        <Border Grid.Row="3" Margin="0,12,0,0" BorderThickness="1" BorderBrush="#CCC" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" BorderBrush="#DDD" BorderThickness="1" Background="#111" CornerRadius="4">
+                    <Grid x:Name="PreviewHost">
+                        <MediaElement x:Name="PreviewPlayer"
+                                      LoadedBehavior="Manual"
+                                      UnloadedBehavior="Manual"
+                                      Stretch="Uniform"
+                                      ScrubbingEnabled="True" />
+                        <Canvas x:Name="CropOverlay"
+                                Background="Transparent"
+                                MouseLeftButtonDown="CropOverlayMouseLeftButtonDown"
+                                MouseMove="CropOverlayMouseMove"
+                                MouseLeftButtonUp="CropOverlayMouseLeftButtonUp"
+                                SizeChanged="CropOverlaySizeChanged" />
+                    </Grid>
+                </Border>
+
+                <Canvas x:Name="TimelineCanvas" Grid.Row="1" Height="24" Margin="0,10,0,0" Background="#1E1E1E" SizeChanged="TimelineCanvasSizeChanged" />
+                <Slider x:Name="FrameSlider" Grid.Row="2" Margin="0,8,0,0" Minimum="0" Maximum="0" ValueChanged="FrameSliderChanged" />
+                <TextBlock x:Name="PreviewInfoText" Grid.Row="3" Margin="0,8,0,0" Text="Preview not initialized." />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="4" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                <TextBlock x:Name="ExportStatusText" Text="Ready." />
+                <ProgressBar x:Name="ExportProgressBar" Height="14" Width="440" Minimum="0" Maximum="100" Value="0" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Width="120" Click="ExportClick">Export</Button>
+                <Button Width="120" Margin="8,0,0,0" Click="CloseClick">Close</Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

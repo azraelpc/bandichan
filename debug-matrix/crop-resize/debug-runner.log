@@ -1,0 +1,10 @@
+[2026-11-02 00:38:46] Starting headless debug recorder/export runner.
+[2026-11-02 00:38:46] OutputRoot=C:\Users\linoc\repo\bandichan\debug-matrix\crop-resize Seconds=4 Fps=30 KeepAudio=True MaxAttempts=1
+[2026-11-02 00:38:46] Monitor selected: \\.\DISPLAY4 (1920x1080) id=\\.\DISPLAY4
+[2026-11-02 00:38:46] Using source override: C:\Users\linoc\Desktop\recording_2026-11-02_00-35-50.mp4
+[2026-11-02 00:38:46] Attempt 1: exporting existing source C:\Users\linoc\Desktop\recording_2026-11-02_00-35-50.mp4
+[2026-11-02 00:38:46] Attempt 1: options Crop=True (8,157,1337x808) Resize=True (1280x720) KeepAudio=True
+[2026-11-02 00:38:46] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-matrix\crop-resize\export_attempt_001.mp4
+[2026-11-02 00:38:52] Attempt 1: FAILED InvalidOperationException (0x80131509): Export failed while preserving edits (crop/resize/cuts). No fallback without edits was applied. | Inner: InvalidOperationException (0x80131509): The parameter is incorrect.
+
+[2026-11-02 00:38:52] No successful export after configured attempts.

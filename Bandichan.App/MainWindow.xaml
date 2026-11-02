@@ -1,0 +1,52 @@
+﻿<Window x:Class="Bandichan.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Bandichan.App"
+        mc:Ignorable="d"
+        Title="Bandichan"
+        Icon="pack://application:,,,/Assets/bandichan.ico"
+        Height="360"
+        Width="640"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock FontSize="26" FontWeight="Bold" Text="Bandichan" />
+        <TextBlock Grid.Row="1" Margin="0,8,0,0" Text="Recorder runs from tray icon." />
+        <TextBlock Grid.Row="2" Margin="0,4,0,0" Text="Right click tray icon to Start/Stop. Double click tray icon to open this window." />
+
+        <Border Grid.Row="3" Margin="0,16,0,0" BorderBrush="#CCC" BorderThickness="1" Padding="12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="180" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" FontWeight="SemiBold" Text="App State" />
+                <TextBlock x:Name="AppStateText" Grid.Row="0" Grid.Column="1" Text="Idle" TextWrapping="Wrap" />
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" FontWeight="SemiBold" Text="Encoder Mode" />
+                <TextBlock x:Name="EncoderModeText" Grid.Row="1" Grid.Column="1" Margin="0,8,0,0" Text="Auto" TextWrapping="Wrap" />
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,8,0,0" FontWeight="SemiBold" Text="Last Video Codec" />
+                <TextBlock x:Name="LastCodecText" Grid.Row="2" Grid.Column="1" Margin="0,8,0,0" Text="-" TextWrapping="Wrap" />
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,8,0,0" FontWeight="SemiBold" Text="Output Folder" />
+                <TextBlock x:Name="OutputFolderText" Grid.Row="3" Grid.Column="1" Margin="0,8,0,0" Text="-" TextWrapping="Wrap" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

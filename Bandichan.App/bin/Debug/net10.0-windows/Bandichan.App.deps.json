@@ -1,0 +1,120 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Bandichan.App/1.0.0": {
+        "dependencies": {
+          "Bandichan.Core": "1.0.0",
+          "Bandichan.Infrastructure": "1.0.0",
+          "CommunityToolkit.Mvvm": "8.4.2",
+          "ScreenRecorderLib.Reference": "1.0.9745.611"
+        },
+        "runtime": {
+          "Bandichan.App.dll": {}
+        }
+      },
+      "CommunityToolkit.Mvvm/8.4.2": {
+        "runtime": {
+          "lib/net8.0/CommunityToolkit.Mvvm.dll": {
+            "assemblyVersion": "8.4.0.0",
+            "fileVersion": "8.4.2.1"
+          }
+        }
+      },
+      "Microsoft.Windows.CsWinRT/0.1.0-prerelease.200629.3": {
+        "runtime": {
+          "lib/net5.0/winrt.runtime.dll": {
+            "assemblyVersion": "0.1.0.2153",
+            "fileVersion": "0.1.0.2153"
+          }
+        }
+      },
+      "Microsoft.Windows.SDK.NET/10.0.18362.6-preview": {
+        "dependencies": {
+          "Microsoft.Windows.CsWinRT": "0.1.0-prerelease.200629.3"
+        },
+        "runtime": {
+          "lib/net5.0/Microsoft.Windows.SDK.NET.dll": {
+            "assemblyVersion": "10.0.18362.6",
+            "fileVersion": "10.0.18362.6"
+          }
+        }
+      },
+      "Bandichan.Core/1.0.0": {
+        "runtime": {
+          "Bandichan.Core.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Bandichan.Infrastructure/1.0.0": {
+        "dependencies": {
+          "Bandichan.Core": "1.0.0",
+          "Microsoft.Windows.SDK.NET": "10.0.18362.6-preview"
+        },
+        "runtime": {
+          "Bandichan.Infrastructure.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "ScreenRecorderLib.Reference/1.0.9745.611": {
+        "runtime": {
+          "ScreenRecorderLib.dll": {
+            "assemblyVersion": "1.0.9745.611",
+            "fileVersion": "7.0.1.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Bandichan.App/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "CommunityToolkit.Mvvm/8.4.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WadCzGEc2U+3e20avRLng4qNtt4zoOGWrdUISqJWrHe3/FSnrYjuM5Sb4yQb09LhkBXrrI4Zt3dLKgRMbItsrg==",
+      "path": "communitytoolkit.mvvm/8.4.2",
+      "hashPath": "communitytoolkit.mvvm.8.4.2.nupkg.sha512"
+    },
+    "Microsoft.Windows.CsWinRT/0.1.0-prerelease.200629.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-+w4zLxMF9+dpdrpQCp7iup8Y+GGq9iZ3M1SmBTLvXT49m2PKk2e7Wx8XjomKWowMNUBKds6zlEAapweqcBpA7w==",
+      "path": "microsoft.windows.cswinrt/0.1.0-prerelease.200629.3",
+      "hashPath": "microsoft.windows.cswinrt.0.1.0-prerelease.200629.3.nupkg.sha512"
+    },
+    "Microsoft.Windows.SDK.NET/10.0.18362.6-preview": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-s4tEghfB6EomvcVVmK9TG2AhyWuqtFPp8jJ7ItgnCfjKZVNFwI8S/+IvV0v4bz8OdbhsfDzUvByQM4I/ABoXYg==",
+      "path": "microsoft.windows.sdk.net/10.0.18362.6-preview",
+      "hashPath": "microsoft.windows.sdk.net.10.0.18362.6-preview.nupkg.sha512"
+    },
+    "Bandichan.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Bandichan.Infrastructure/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ScreenRecorderLib.Reference/1.0.9745.611": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Bandichan.App/Bandichan.App.csproj" />
+  <Project Path="Bandichan.Core/Bandichan.Core.csproj" />
+  <Project Path="Bandichan.Infrastructure/Bandichan.Infrastructure.csproj" />
+  <Project Path="Bandichan.Tests/Bandichan.Tests.csproj" />
+</Solution>

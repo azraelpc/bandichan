@@ -1,0 +1,12 @@
+C:\Users\linoc\repo\bandichan\Bandichan.Core\bin\Debug\net10.0\Bandichan.Core.deps.json
+C:\Users\linoc\repo\bandichan\Bandichan.Core\bin\Debug\net10.0\Bandichan.Core.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Core\bin\Debug\net10.0\Bandichan.Core.pdb
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\Bandichan.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\Bandichan.Core.AssemblyInfoInputs.cache
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\Bandichan.Core.AssemblyInfo.cs
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\Bandichan.Core.csproj.CoreCompileInputs.cache
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\Bandichan.Core.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\refint\Bandichan.Core.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\Bandichan.Core.pdb
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\ref\Bandichan.Core.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Core\obj\Debug\net10.0\Bandichan.Core.sourcelink.json

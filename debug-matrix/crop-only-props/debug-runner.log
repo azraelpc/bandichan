@@ -1,0 +1,10 @@
+[2026-11-02 00:39:21] Starting headless debug recorder/export runner.
+[2026-11-02 00:39:21] OutputRoot=C:\Users\linoc\repo\bandichan\debug-matrix\crop-only-props Seconds=4 Fps=30 KeepAudio=True MaxAttempts=1
+[2026-11-02 00:39:21] Monitor selected: \\.\DISPLAY4 (1920x1080) id=\\.\DISPLAY4
+[2026-11-02 00:39:21] Using source override: C:\Users\linoc\Desktop\recording_2026-11-02_00-35-50.mp4
+[2026-11-02 00:39:21] Attempt 1: exporting existing source C:\Users\linoc\Desktop\recording_2026-11-02_00-35-50.mp4
+[2026-11-02 00:39:21] Attempt 1: source props Width=1920 Height=1080 Duration=00:00:09.6000000
+[2026-11-02 00:39:21] Attempt 1: options Crop=True (8,157,1337x808) Resize=False (0x0) KeepAudio=True
+[2026-11-02 00:39:21] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-matrix\crop-only-props\export_attempt_001.mp4
+[2026-11-02 00:39:27] Attempt 1: FAILED InvalidOperationException (0x80131509): Export failed while preserving edits (crop/resize/cuts). No fallback without edits was applied. | Inner: InvalidOperationException (0x80131509): Operation is not valid due to the current state of the object.
+[2026-11-02 00:39:27] No successful export after configured attempts.

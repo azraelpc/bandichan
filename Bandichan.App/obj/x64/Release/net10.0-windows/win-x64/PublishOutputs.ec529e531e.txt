@@ -1,0 +1,3 @@
+C:\Users\linoc\repo\bandichan\publish\win-x64\ScreenRecorderLib.pdb
+C:\Users\linoc\repo\bandichan\publish\win-x64\ScreenRecorderLib.xml
+C:\Users\linoc\repo\bandichan\publish\win-x64\Bandichan.App.exe

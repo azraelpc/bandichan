@@ -1,0 +1,11 @@
+[2026-11-02 00:52:16] Starting headless debug recorder/export runner.
+[2026-11-02 00:52:16] OutputRoot=C:\Users\linoc\repo\bandichan\debug-matrix\crop-resize-audiofix2 Seconds=4 Fps=30 KeepAudio=True MaxAttempts=1
+[2026-11-02 00:52:16] Monitor selected: \\.\DISPLAY4 (1920x1080) id=\\.\DISPLAY4
+[2026-11-02 00:52:16] Using source override: C:\Users\linoc\repo\bandichan\debug-export\attempt_001\recording_2026-11-01_23-55-06.mp4
+[2026-11-02 00:52:16] Attempt 1: exporting existing source C:\Users\linoc\repo\bandichan\debug-export\attempt_001\recording_2026-11-01_23-55-06.mp4
+[2026-11-02 00:52:17] Attempt 1: source audio tracks=1 selectedIndex=0
+[2026-11-02 00:52:17] Attempt 1: source props Width=1920 Height=1080 Duration=00:00:03.1360000
+[2026-11-02 00:52:17] Attempt 1: options Crop=True (8,157,1337x808) Resize=True (1280x720) KeepAudio=True
+[2026-11-02 00:52:17] Attempt 1: exporting to C:\Users\linoc\repo\bandichan\debug-matrix\crop-resize-audiofix2\export_attempt_001.mp4
+[2026-11-02 00:52:21] Attempt 1: output audio tracks=0 selectedIndex=0
+[2026-11-02 00:52:21] Attempt 1: SUCCESS output=C:\Users\linoc\repo\bandichan\debug-matrix\crop-resize-audiofix2\export_attempt_001.mp4 size=1,71 MB

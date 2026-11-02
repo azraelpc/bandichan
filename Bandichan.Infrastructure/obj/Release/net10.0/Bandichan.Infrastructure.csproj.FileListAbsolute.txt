@@ -1,0 +1,12 @@
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0\Bandichan.Infrastructure.deps.json
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0\Bandichan.Infrastructure.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0\Bandichan.Core.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\Bandichan.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\Bandichan.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\Bandichan.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\Bandichan.Infrastructure.AssemblyInfo.cs
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\Bandichan.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\Bandicha.0FB44D1D.Up2Date
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\Bandichan.Infrastructure.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\refint\Bandichan.Infrastructure.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0\ref\Bandichan.Infrastructure.dll
