@@ -1,4 +1,4 @@
-﻿# Bandichan
+﻿# Bandichan (beta - mvp)
 
 Bandichan es una app de grabacion de pantalla para Windows con flujo tray-first y editor integrado para recorte, cortes por segmentos y exportacion nativa.
 
