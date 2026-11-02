@@ -1,17 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "d8iV9Hi1nZs=",
+  "dgSpecHash": "i3B5Ykr/VO4=",
   "success": true,
   "projectFilePath": "C:\\Users\\linoc\\repo\\bandichan\\Bandichan.App\\Bandichan.App.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\linoc\\.nuget\\packages\\communitytoolkit.mvvm\\8.4.2\\communitytoolkit.mvvm.8.4.2.nupkg.sha512",
-    "C:\\Users\\linoc\\.nuget\\packages\\microsoft.net.illink.tasks\\10.0.12\\microsoft.net.illink.tasks.10.0.12.nupkg.sha512",
     "C:\\Users\\linoc\\.nuget\\packages\\microsoft.windows.cswinrt\\0.1.0-prerelease.200629.3\\microsoft.windows.cswinrt.0.1.0-prerelease.200629.3.nupkg.sha512",
     "C:\\Users\\linoc\\.nuget\\packages\\microsoft.windows.sdk.net\\10.0.18362.6-preview\\microsoft.windows.sdk.net.10.0.18362.6-preview.nupkg.sha512",
-    "C:\\Users\\linoc\\.nuget\\packages\\screenrecorderlib\\7.0.1\\screenrecorderlib.7.0.1.nupkg.sha512",
-    "C:\\Users\\linoc\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\10.0.12\\microsoft.netcore.app.runtime.win-x64.10.0.12.nupkg.sha512",
-    "C:\\Users\\linoc\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\10.0.12\\microsoft.windowsdesktop.app.runtime.win-x64.10.0.12.nupkg.sha512",
-    "C:\\Users\\linoc\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\10.0.12\\microsoft.aspnetcore.app.runtime.win-x64.10.0.12.nupkg.sha512"
+    "C:\\Users\\linoc\\.nuget\\packages\\screenrecorderlib\\7.0.1\\screenrecorderlib.7.0.1.nupkg.sha512"
   ],
   "logs": []
 }

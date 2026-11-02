@@ -26,7 +26,7 @@
             MouseDoubleClick="MonitorsListMouseDoubleClick">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding DisplayName}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
