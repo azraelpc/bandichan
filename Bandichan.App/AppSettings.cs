@@ -15,4 +15,6 @@ public sealed class AppSettings
     public string? SystemAudioDevice { get; set; }
 
     public bool RunAtStartup { get; set; }
+
+    public bool HasShownTrayVisibilityHint { get; set; }
 }

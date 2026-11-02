@@ -1,0 +1,15 @@
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0-windows\Bandichan.Infrastructure.deps.json
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0-windows\Bandichan.Infrastructure.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0-windows\Bandichan.Core.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0-windows\ScreenRecorderLib.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0-windows\ScreenRecorderLib.pdb
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\bin\Release\net10.0-windows\ScreenRecorderLib.xml
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\Bandichan.Infrastructure.csproj.AssemblyReference.cache
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\Bandichan.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\Bandichan.Infrastructure.AssemblyInfoInputs.cache
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\Bandichan.Infrastructure.AssemblyInfo.cs
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\Bandichan.Infrastructure.csproj.CoreCompileInputs.cache
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\Bandicha.0FB44D1D.Up2Date
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\Bandichan.Infrastructure.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\refint\Bandichan.Infrastructure.dll
+C:\Users\linoc\repo\bandichan\Bandichan.Infrastructure\obj\Release\net10.0-windows\ref\Bandichan.Infrastructure.dll

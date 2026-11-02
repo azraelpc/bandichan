@@ -493,7 +493,12 @@ C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\
 C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\zh-Hant\UIAutomationTypes.resources.dll
 C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\zh-Hant\WindowsBase.resources.dll
 C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\zh-Hant\WindowsFormsIntegration.resources.dll
-C:\Users\linoc\repo\bandichan\Bandichan.App\obj\Release\net10.0-windows\win-x64\DownloadProgressWindow.baml
 C:\Users\linoc\repo\bandichan\Bandichan.App\obj\Release\net10.0-windows\win-x64\SettingsWindow.baml
-C:\Users\linoc\repo\bandichan\Bandichan.App\obj\Release\net10.0-windows\win-x64\DownloadProgressWindow.g.cs
 C:\Users\linoc\repo\bandichan\Bandichan.App\obj\Release\net10.0-windows\win-x64\SettingsWindow.g.cs
+C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\winrt.runtime.dll
+C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\Microsoft.Windows.SDK.NET.dll
+C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\ScreenRecorderLib.dll
+C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\ScreenRecorderLib.pdb
+C:\Users\linoc\repo\bandichan\Bandichan.App\bin\Release\net10.0-windows\win-x64\ScreenRecorderLib.xml
+C:\Users\linoc\repo\bandichan\Bandichan.App\obj\Release\net10.0-windows\win-x64\ExportCompletedWindow.baml
+C:\Users\linoc\repo\bandichan\Bandichan.App\obj\Release\net10.0-windows\win-x64\ExportCompletedWindow.g.cs

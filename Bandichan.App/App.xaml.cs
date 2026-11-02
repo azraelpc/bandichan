@@ -94,6 +94,7 @@ public partial class App : System.Windows.Application
 		_toggleRecordingMenuItem = new Forms.ToolStripMenuItem("Start Recording", null, async (_, _) => await ToggleRecordingFromTrayAsync());
 		var openMenuItem = new Forms.ToolStripMenuItem("Open", null, (_, _) => ShowMainWindow());
 		var settingsMenuItem = new Forms.ToolStripMenuItem("Settings", null, (_, _) => OpenSettings());
+		var trayIconSettingsMenuItem = new Forms.ToolStripMenuItem("Tray Icon Settings...", null, (_, _) => OpenTrayIconSettings());
 		_runWithWindowsMenuItem = new Forms.ToolStripMenuItem("Run with Windows", null, (_, _) => ToggleRunWithWindowsFromTray())
 		{
 			CheckOnClick = false,
@@ -114,8 +115,10 @@ public partial class App : System.Windows.Application
 		_notifyIcon.ContextMenuStrip.Items.Add(openMenuItem);
 		_notifyIcon.ContextMenuStrip.Items.Add(settingsMenuItem);
 		_notifyIcon.ContextMenuStrip.Items.Add(_runWithWindowsMenuItem);
+		_notifyIcon.ContextMenuStrip.Items.Add(trayIconSettingsMenuItem);
 		_notifyIcon.ContextMenuStrip.Items.Add(new Forms.ToolStripSeparator());
 		_notifyIcon.ContextMenuStrip.Items.Add(exitMenuItem);
+		_notifyIcon.MouseClick += (_, _) => ShowTrayVisibilityHintOnce();
 		_notifyIcon.DoubleClick += (_, _) => ShowMainWindow();
 	}
 
@@ -506,6 +509,48 @@ public partial class App : System.Windows.Application
 		_notifyIcon.BalloonTipText = "The app is running in the system tray. Right-click the tray icon to start or stop recording.";
 		_notifyIcon.BalloonTipIcon = Forms.ToolTipIcon.Info;
 		_notifyIcon.ShowBalloonTip(5000);
+	}
+
+	private void ShowTrayVisibilityHintOnce()
+	{
+		if (_settings.HasShownTrayVisibilityHint)
+		{
+			return;
+		}
+
+		_settings.HasShownTrayVisibilityHint = true;
+		SettingsStore.Save(_settings);
+
+		var result = System.Windows.MessageBox.Show(
+			"Windows may hide tray icons by default. Do you want to open Taskbar settings now to make Bandichan always visible?",
+			"Bandichan",
+			MessageBoxButton.YesNo,
+			MessageBoxImage.Information);
+
+		if (result == MessageBoxResult.Yes)
+		{
+			OpenTrayIconSettings();
+		}
+	}
+
+	private void OpenTrayIconSettings()
+	{
+		try
+		{
+			var psi = new System.Diagnostics.ProcessStartInfo("ms-settings:taskbar")
+			{
+				UseShellExecute = true,
+			};
+			System.Diagnostics.Process.Start(psi);
+		}
+		catch
+		{
+			System.Windows.MessageBox.Show(
+				"Could not open Taskbar settings automatically. Open Settings > Personalization > Taskbar and enable Bandichan under system tray icons.",
+				"Bandichan",
+				MessageBoxButton.OK,
+				MessageBoxImage.Information);
+		}
 	}
 }
 
