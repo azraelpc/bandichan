@@ -16,6 +16,8 @@ Bandichan es una app de grabacion de pantalla para Windows con flujo tray-first 
 - Export con crop: estabilizado con pipeline visual por overlays (sin CropRectangle directo).
 - Audio en export con crop: conservado mediante clip base con audio + overlays de video muteados.
 - App en bandeja: estados Idle / Recording / Processing / Editing con transiciones protegidas.
+- Single-instance: habilitado (si ya existe una instancia, la segunda termina).
+- Inicio con Windows: configurable desde tray (desactivado por defecto).
 
 ## Caracteristicas
 
@@ -41,8 +43,9 @@ Bandichan es una app de grabacion de pantalla para Windows con flujo tray-first 
 ### UX de bandeja
 
 - Arranque en tray.
-- Menu contextual: Start/Stop, Open, Settings, Exit.
+- Menu contextual: Start/Stop, Open, Settings, Run with Windows, Tray Icon Settings..., Exit.
 - Main window no bloqueante (se oculta al cerrar salvo salida explicita).
+- Onboarding de visibilidad del icono: tip one-shot para abrir Taskbar settings en Windows 11.
 
 ## Arquitectura
 
@@ -87,12 +90,15 @@ Campos principales:
 - CaptureFrameRate
 - RecordSystemAudio
 - SystemAudioDevice
+- RunAtStartup
+- HasShownTrayVisibilityHint
 
 ## Flujo de uso rapido
 
 1. Ejecuta la app.
 2. Usa icono de bandeja para Start Recording.
 3. Selecciona monitor.
+  - El monitor donde esta visible el selector se marca como: "This display (where this window is shown)".
 4. Stop Recording desde bandeja.
 5. Se abre EditorWindow.
 6. Ajusta crop/resize/cortes.
@@ -104,7 +110,7 @@ Campos principales:
 
 ```powershell
 dotnet restore
-dotnet build .\Bandichan.App\Bandichan.App.csproj -c Debug
+dotnet build .\Bandichan.slnx -c Debug
 ```
 
 ### Ejecutar app
@@ -112,6 +118,8 @@ dotnet build .\Bandichan.App\Bandichan.App.csproj -c Debug
 ```powershell
 dotnet run --project .\Bandichan.App\Bandichan.App.csproj
 ```
+
+Nota: si `dotnet run` devuelve codigo `1` de forma intermitente, normalmente hay una instancia previa viva en tray por el modo single-instance.
 
 ### Ejecutar tests
 
@@ -128,6 +136,7 @@ dotnet publish .\Bandichan.App\Bandichan.App.csproj -c Release -r win-x64
 Salida tipica:
 
 - publish/win-x64/
+- Artefacto final principal: Bandichan.App.exe
 
 ## Runner de diagnostico (headless)
 
@@ -170,7 +179,24 @@ Solucion:
 
 ```powershell
 Get-Process -Name Bandichan.App -ErrorAction SilentlyContinue | Stop-Process -Force
-dotnet build .\Bandichan.App\Bandichan.App.csproj -c Debug
+dotnet build .\Bandichan.slnx -c Debug
+```
+
+### dotnet run finaliza con codigo 1
+
+Sintoma:
+
+- `dotnet run --project .\Bandichan.App\Bandichan.App.csproj` termina sin abrir una segunda UI.
+
+Contexto:
+
+- Es esperado cuando ya hay una instancia activa (single-instance con mutex global).
+
+Solucion:
+
+```powershell
+Get-Process -Name Bandichan.App -ErrorAction SilentlyContinue | Stop-Process -Force
+dotnet run --project .\Bandichan.App\Bandichan.App.csproj
 ```
 
 ### No aparecen monitores
